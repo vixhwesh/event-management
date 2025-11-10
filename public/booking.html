@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Tickets</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    function q(k){return new URLSearchParams(location.search).get(k)}
+    async function submitForm(ev){
+      ev.preventDefault();
+      const eventId = q('id');
+      const quantity = Number(document.getElementById('quantity').value || 1);
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ eventId, quantity })
+      });
+      const out = document.getElementById('out');
+      if(!res.ok){
+        const t = await res.json().catch(()=>({message:'Error'}));
+        out.textContent = t.message || 'Booking failed';
+        out.style.color = 'crimson';
+        return;
+      }
+      const b = await res.json();
+      out.textContent = `Booked! Ticket: ${b.ticketId}`;
+      out.style.color = 'green';
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('form').addEventListener('submit', submitForm);
+    });
+  </script>
+</head>
+<body>
+  <div class="container" style="max-width:600px">
+    <div class="header">
+      <div class="brand"><a class="nav" href="/">← Back</a></div>
+      <div class="nav">
+        <a href="/auth.html">Login/Register</a>
+      </div>
+    </div>
+    <h1>Book Tickets</h1>
+    <div class="card">
+      <form id="form" class="stack">
+        <div class="field"><label>Quantity</label>
+          <input class="input" id="quantity" type="number" min="1" value="1" />
+        </div>
+        <button class="btn" type="submit">Book</button>
+      </form>
+      <div id="out" class="notice"></div>
+    </div>
+  </div>
+</body>
+</html>
+
+

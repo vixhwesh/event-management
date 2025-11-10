@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organizer</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    async function submitEvent(ev){
+      ev.preventDefault();
+      const body = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        date: document.getElementById('date').value,
+        location: document.getElementById('location').value,
+        seats: Number(document.getElementById('seats').value)
+      };
+      const res = await fetch('/api/events', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify(body) });
+      const out = document.getElementById('out');
+      if(!res.ok){ const t = await res.json().catch(()=>({message:'Error'})); out.textContent = t.message; out.style.color='crimson'; return; }
+      const e = await res.json();
+      out.textContent = `Event created with id ${e._id}. Status: ${e.status}`; out.style.color='green';
+      loadMine();
+    }
+    async function loadMine(){
+      // naive: load all approved + pending created by me by calling admin list is not allowed; so fetch public list and show none owned indicator
+      // In real app we'd provide organizer self-list API. Here, show recently created info only.
+      const list = document.getElementById('mine');
+      list.innerHTML = '<div class="notice">After creating, ask admin to approve in Admin page.</div>';
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('form').addEventListener('submit', submitEvent);
+      loadMine();
+    });
+  </script>
+</head>
+<body>
+  <div class="container" style="max-width:800px">
+    <div class="header">
+      <div class="brand"><a class="nav" href="/">← Back</a></div>
+      <div class="nav"><a href="/auth.html">Login/Register</a></div>
+    </div>
+    <h1>Organizer Dashboard</h1>
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      <section class="card">
+        <h2>Create Event</h2>
+        <form id="form" class="stack">
+          <div class="field"><label>Title</label><input class="input" id="title" required /></div>
+          <div class="field"><label>Description</label><textarea class="input" id="description" required></textarea></div>
+          <div class="field"><label>Date/time</label><input class="input" id="date" type="datetime-local" required /></div>
+          <div class="field"><label>Location</label><input class="input" id="location" required /></div>
+          <div class="field"><label>Seats</label><input class="input" id="seats" type="number" min="0" required /></div>
+          <button class="btn" type="submit">Create</button>
+        </form>
+        <div id="out" class="notice"></div>
+      </section>
+      <section class="card">
+        <h2>My Events</h2>
+        <div id="mine" class="stack"></div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Details</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    function q(k){return new URLSearchParams(location.search).get(k)}
+    async function load(){
+      const id = q('id');
+      const res = await fetch(`/api/events/${id}`);
+      if(!res.ok){ document.body.innerHTML = '<p>Event not found.</p>'; return; }
+      const e = await res.json();
+      document.getElementById('title').textContent = e.title;
+      document.getElementById('meta').textContent = `${new Date(e.date).toLocaleString()} • ${e.location}`;
+      document.getElementById('desc').textContent = e.description;
+      document.getElementById('seats').textContent = `Seats available: ${e.seats}`;
+      document.getElementById('book').href = `/booking.html?id=${e._id}`;
+    }
+    window.addEventListener('DOMContentLoaded', load);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand"><a class="nav" href="/">← Back</a></div>
+      <div class="nav">
+        <a href="/auth.html">Login/Register</a>
+        <a href="/organizer.html">Organizer</a>
+        <a href="/admin.html">Admin</a>
+      </div>
+    </div>
+    <h1 id="title"></h1>
+    <div id="meta" class="muted"></div>
+    <p id="desc"></p>
+    <p id="seats" class="muted"></p>
+    <p><a class="btn" id="book" href="#">Book Tickets</a></p>
+  </div>
+</body>
+</html>
+
+

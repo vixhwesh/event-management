@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    let current='events';
+    async function loadEvents(){
+      const res = await fetch('/api/admin/events', { credentials: 'include' });
+      const events = await res.json();
+      const wrap = document.getElementById('content');
+      wrap.innerHTML = events.map(e => `
+        <div class=\"tr\">\n          <div>${e.title}</div>\n          <div class=\"muted\">${new Date(e.date).toLocaleString()}</div>\n          <div>${e.location}</div>\n          <div>${e.seats}</div>\n          <div>${e.status}</div>\n          <div>\n            <button class=\"btn ok\" data-id=\"${e._id}\" data-act=\"approve\">Approve</button>
+            <button class=\"btn bad\" data-id=\"${e._id}\" data-act=\"reject\">Reject</button>
+          </div>\n        </div>
+      `).join('');
+      wrap.onclick = async (ev)=>{
+        const btn = ev.target.closest('button'); if(!btn) return;
+        const id = btn.getAttribute('data-id');
+        const act = btn.getAttribute('data-act');
+        const res = await fetch(`/api/admin/events/${id}/${act}`, { method:'PATCH', credentials:'include' });
+        if(res.ok) loadEvents();
+      };
+    }
+    async function loadUsers(){
+      const res = await fetch('/api/admin/users', { credentials: 'include' });
+      const users = await res.json();
+      const wrap = document.getElementById('content');
+      wrap.innerHTML = users.map(u => `
+        <div class=\"tr\" style=\"grid-template-columns:2fr 2fr 1fr 1fr\">\n          <div>${u.name}</div>\n          <div class=\"muted\">${u.email}</div>\n          <div>${u.role}</div>\n          <div>${new Date(u.createdAt).toLocaleDateString()}</div>\n        </div>
+      `).join('');
+    }
+    async function loadBookings(){
+      const res = await fetch('/api/admin/bookings', { credentials: 'include' });
+      const b = await res.json();
+      const wrap = document.getElementById('content');
+      wrap.innerHTML = b.map(x => `
+        <div class=\"tr\" style=\"grid-template-columns:2fr 2fr 1fr 1fr\">\n          <div>Ticket: ${x.ticketId}</div>\n          <div class=\"muted\">${new Date(x.createdAt).toLocaleString()}</div>\n          <div>Qty: ${x.quantity}</div>\n          <div>Event: ${x.eventId}</div>\n        </div>
+      `).join('');
+    }
+    function setTab(tab){
+      current = tab;
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+      if(tab==='events') loadEvents();
+      if(tab==='users') loadUsers();
+      if(tab==='bookings') loadBookings();
+    }
+    window.addEventListener('DOMContentLoaded', ()=>setTab('events'));
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand"><a class="nav" href="/">← Back</a></div>
+      <div class="nav"><a href="/auth.html">Login/Register</a></div>
+    </div>
+    <h1>Admin Dashboard</h1>
+    <div class="tabs">
+      <div class="tab active" data-tab="events" onclick="setTab('events')">Events</div>
+      <div class="tab" data-tab="users" onclick="setTab('users')">Users</div>
+      <div class="tab" data-tab="bookings" onclick="setTab('bookings')">Bookings</div>
+    </div>
+    <div id="content" class="stack"></div>
+  </div>
+</body>
+</html>
+
+

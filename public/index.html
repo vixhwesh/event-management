@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    async function load() {
+      const res = await fetch('/api/events');
+      const events = await res.json();
+      const grid = document.getElementById('grid');
+      grid.innerHTML = events.map(e => `
+        <div class="card">
+          <h3>${e.title}</h3>
+          <div class="muted">${new Date(e.date).toLocaleString()} • ${e.location}</div>
+          <p>${e.description}</p>
+          <div class="muted">Seats: ${e.seats}</div>
+          <p><a href="/event.html?id=${e._id}">View Details</a></p>
+        </div>
+      `).join('');
+    }
+    window.addEventListener('DOMContentLoaded', load);
+  </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="brand">EventBook</div>
+        <div class="nav">
+          <a href="/auth.html">Login/Register</a>
+          <a href="/organizer.html">Organizer</a>
+          <a href="/admin.html">Admin</a>
+        </div>
+      </div>
+      <h1>Upcoming Events</h1>
+      <div id="grid" class="grid"></div>
+    </div>
+  </body>
+</html>
+
+

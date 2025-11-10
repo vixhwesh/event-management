@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auth</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    async function doRegister(ev){
+      ev.preventDefault();
+      const body = {
+        name: document.getElementById('r_name').value,
+        email: document.getElementById('r_email').value,
+        password: document.getElementById('r_password').value,
+        role: document.getElementById('r_role').value
+      };
+      const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const out = document.getElementById('r_out');
+      if(!res.ok){ const t = await res.json().catch(()=>({message:'Error'})); out.textContent = t.message; out.style.color='crimson'; return; }
+      out.textContent = 'Registered! Now login.'; out.style.color='green';
+    }
+    async function doLogin(ev){
+      ev.preventDefault();
+      const body = {
+        email: document.getElementById('l_email').value,
+        password: document.getElementById('l_password').value
+      };
+      const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify(body) });
+      const out = document.getElementById('l_out');
+      if(!res.ok){ const t = await res.json().catch(()=>({message:'Error'})); out.textContent = t.message; out.style.color='crimson'; return; }
+      out.textContent = 'Logged in!'; out.style.color='green';
+    }
+    async function doLogout(){
+      await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+      alert('Logged out');
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('r_form').addEventListener('submit', doRegister);
+      document.getElementById('l_form').addEventListener('submit', doLogin);
+      document.getElementById('logout').addEventListener('click', doLogout);
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand"><a class="nav" href="/">← Back</a></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      <section class="card">
+        <h2>Register</h2>
+        <form id="r_form" class="stack">
+          <div class="field"><label>Name</label><input class="input" id="r_name" required /></div>
+          <div class="field"><label>Email</label><input class="input" id="r_email" type="email" required /></div>
+          <div class="field"><label>Password</label><input class="input" id="r_password" type="password" required /></div>
+          <div class="field"><label>Role</label>
+            <select id="r_role" class="input">
+              <option value="user">user</option>
+              <option value="organizer">organizer</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+          <button class="btn" type="submit">Register</button>
+        </form>
+        <div id="r_out" class="notice"></div>
+      </section>
+      <section class="card">
+        <h2>Login</h2>
+        <form id="l_form" class="stack">
+          <div class="field"><label>Email</label><input class="input" id="l_email" type="email" required /></div>
+          <div class="field"><label>Password</label><input class="input" id="l_password" type="password" required /></div>
+          <button class="btn" type="submit">Login</button>
+        </form>
+        <div id="l_out" class="notice"></div>
+        <p><button class="btn secondary" id="logout" type="button">Logout</button></p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+
+
